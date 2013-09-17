@@ -48,7 +48,7 @@ private:
 public:
 
 	//Modifiers
-	void initTile(void);
+	tile(void);
 	void setTile(bool passable, string bitMap, string newDescription);
 	void changeID(unsigned int newID);
 	void changePassThrough(bool passable);
@@ -74,7 +74,7 @@ outputs
 
 This function sets up an empty tile
 */
-void tile::initTile(void)
+tile::tile(void)
 {
 	ID = 0;
 	passThrough = false;
@@ -122,6 +122,7 @@ void tile::printLog(void)
 void tile::changeID(unsigned int newID) {ID = newID;}
 void tile::changePassThrough(bool passable) {passThrough = passable;}
 void tile::changeBitMapName(string bitMap) {bitMapName = bitMap;}
+void tile::changeDescription(string newDescription) {description = newDescription;}
 int tile::getID(void) {return ID;}
 bool tile::getPassThrough(void) {return passThrough;}
 string tile::getBitMapName(void) {return bitMapName;}
@@ -166,7 +167,7 @@ class object
 	public:
 
 		//Modifiers
-		void initObject(void);
+		object(void);
 		void setObject(direction newFace, bool passable, string newBitMapName, string newDescription);
 		void changeID(unsigned int newID);
 		void changePassThrough(bool passable);
@@ -185,7 +186,7 @@ class object
 
 };
 
-void object::initObject(void)
+object::object(void)
 {
 	ID = 0;
 	face = up;
@@ -251,7 +252,7 @@ class actor
 	public:
 
 		//Modifiers
-		void initActor(void);
+		actor(void);
 		void setActor(direction newFace, string newBitMapName, string newDescription);
 		void changeID(unsigned int newID);
 		void changeDirection(direction newFace);
@@ -276,7 +277,7 @@ output
 
 This function initializes the current actor
 */
-void actor::initActor(void)
+actor::actor(void)
 {
 	ID = 0;
 	face = up;
@@ -351,7 +352,7 @@ class world
 
 	public:
 
-		void initWorld(unsigned int size[2]);
+		world(unsigned int size[2]);
 		void setTiles(vector<tile> newTileSet);
 		void setObjects(vector<object> newObjectSet);
 		void setActor(vector<actor> newActorSet);
@@ -363,9 +364,9 @@ class world
 		void removeObject(unsigned int ID);
 		void removeActor(unsigned int ID);
 		void getLog(void);
-		void setTileLocation(unsigned int pos[2], unsigned unsigned int ID);
-		void setObjectLocation(unsigned int pos[2], unsigned unsigned int ID);
-		void setActorLocation(unsigned int pos[2], unsigned unsigned int ID);
+		void setTileLocation(unsigned int pos[2], unsigned int ID);
+		void setObjectLocation(unsigned int pos[2], unsigned int ID);
+		void setActorLocation(unsigned int pos[2], unsigned int ID);
 		void swapTile(tile newTile, int ID);
 		void swapObject(object newObject, int ID);
 		void swapActor(actor newCharacter, int ID);
@@ -378,6 +379,9 @@ class world
 		vector<tile> getTileSet(void);
 		vector<object> getObjectSet(void);
 		vector<actor> getActorSet(void);
+
+		bool getTileCollision(unsigned int ID);
+		bool getObjectCollision(unsigned int ID);
 
 		void changeTilePassthrough(unsigned int ID, bool passable);
 		void changeObjectPassthrough(unsigned int ID, bool passable);
@@ -392,12 +396,62 @@ class world
 
 };
 
+
+/*
+inputs
+	unsigned int size[2] - This is the size of the world you are building
+						   specifying the x and y values respectively
+outputs void
+This function clears all of the arrays and sets, and then builds a map
+that contains only empty tiles, objects, and actors
+*/
+world::world(unsigned int size[2])
+{
+	tileSet.clear();
+	objectSet.clear();
+	actorSet.clear();
+	
+	delete[] tileLocations;
+	delete[] objectLocations;
+	delete[] actorLocations;
+
+	dimensions[0] = unsigned int(size[0]);
+	dimensions[1] = unsigned int(size[1]);
+
+	tileLocations = new int[size[0]*size[1]];
+	objectLocations = new int[size[0]*size[1]];
+	actorLocations = new int[size[0]*size[1]];
+	
+	tile block;
+	addTile(block);
+	
+	object objectBlock;
+	addObject(objectBlock);
+
+	actor character;
+	addActor(character);
+	unsigned int temp[2];
+	
+	for(int i = 0; i < dimensions[0]; i++)
+	{
+		for(int j =0; j < dimensions[1]; j++) 
+		{
+			temp[0] = i, temp[1] = j;
+			setTileLocation(temp, 0);
+			setObjectLocation(temp, 0);
+			setActorLocation(temp, 0);
+		}
+	}
+}
+
 tile world::getTile(unsigned int ID) {return tileSet.at(ID);}
 object world::getObject(unsigned int ID) {return objectSet.at(ID);}
 actor world::getCharacter(unsigned int ID) {return actorSet.at(ID);}
 vector<tile> world::getTileSet(void) {return tileSet;}
 vector<object> world::getObjectSet(void) {return objectSet;}
 vector<actor> world::getActorSet(void) {return actorSet;}
+bool world::getTileCollision(unsigned int ID) {return tileSet.at(ID).getPassThrough();}
+bool world::getObjectCollision(unsigned int ID) {return objectSet.at(ID).getPassThrough();}
 
 /*
 inputs
@@ -420,6 +474,21 @@ void world::changeDimension(unsigned int size[2])
 	tileLocations = new int[size[0]*size[1]];
 	objectLocations = new int[size[0]*size[1]];
 	actorLocations = new int[size[0]*size[1]];
+	unsigned int temp[2];
+	/*
+	This will be updated later so that the existing 
+	map will be maintained in the new map
+	*/
+	for(int i = 0; i < dimensions[0]; i++)
+	{
+		for(int j =0; j < dimensions[1]; j++) 
+		{
+			temp[0] = i, temp[1] = j;
+			setTileLocation(temp, 0);
+			setObjectLocation(temp, 0);
+			setActorLocation(temp, 0);
+		}
+	}
 }
 
 void world::changeTilePassthrough(unsigned int ID, bool passable) {tileSet.at(ID).changePassThrough(passable);}
@@ -549,7 +618,8 @@ does not check for spaces that do not exist
 int world::checkTileMap(unsigned int pos[2]) 
 {
 	unsigned int ID;
-	if(pos[0] > dimensions[0] || pos[1] > dimensions[1]) return NULL;
+	//If the map has spaces outside of the range then they are empty tiles
+	if(pos[0] > dimensions[0] || pos[1] > dimensions[1]) return 0;
 	ID = tileLocations[pos[0] + pos[1]*dimensions[0]];
 	return ID;
 }
@@ -568,6 +638,7 @@ does not check for spaces that do not exist
 int world::checkObjectMap(unsigned int pos[2]) 
 {
 	unsigned int ID;
+	//If the map has spaces outside of the range then they are empty tiles
 	if(pos[0] > dimensions[0] || pos[1] > dimensions[1]) return NULL;
 	ID = objectLocations[pos[0] + pos[1]*dimensions[0]];
 	return ID;
@@ -587,6 +658,7 @@ does not check for spaces that do not exist
 int world::checkActorMap(unsigned int pos[2])
 {
 	unsigned int ID;
+	//If the map has spaces outside of the range then they are empty tiles
 	if(pos[0] > dimensions[0] || pos[1] > dimensions[1]) return NULL;
 	ID = actorLocations[pos[0] + pos[1]*dimensions[0]];
 	return ID;
@@ -638,56 +710,6 @@ void world::setActorLocation(unsigned int pos[2], unsigned unsigned int ID)
 int world::getX(void) {return dimensions[0];}
 //getY returns the world's y dimension size
 int world::getY(void) {return dimensions[1];}
-
-/*
-inputs
-	unsigned int size[2] - This is the size of the world you are building
-						   specifying the x and y values respectively
-outputs void
-This function clears all of the arrays and sets, and then builds a map
-that contains only empty tiles, objects, and actors
-*/
-void world::initWorld(unsigned int size[2])
-{
-	tileSet.clear();
-	objectSet.clear();
-	actorSet.clear();
-	
-	delete[] tileLocations;
-	delete[] objectLocations;
-	delete[] actorLocations;
-
-	dimensions[0] = unsigned int(size[0]);
-	dimensions[1] = unsigned int(size[1]);
-
-	tileLocations = new int[size[0]*size[1]];
-	objectLocations = new int[size[0]*size[1]];
-	actorLocations = new int[size[0]*size[1]];
-	
-	tile block;
-	block.initTile();
-	addTile(block);
-	
-	object objectBlock;
-	objectBlock.initObject();
-	addObject(objectBlock);
-
-	actor character;
-	character.initActor();
-	addActor(character);
-	unsigned int temp[2];
-	
-	for(int i = 0; i < dimensions[0]; i++)
-	{
-		for(int j =0; j < dimensions[1]; j++) 
-		{
-			temp[0] = i, temp[1] = j;
-			setTileLocation(temp, 0);
-			setObjectLocation(temp, 0);
-			setActorLocation(temp, 0);
-		}
-	}
-}
 
 /*
 inputs
