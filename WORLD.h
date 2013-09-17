@@ -17,6 +17,41 @@ to manage there respective entity type
 
 using namespace std;
 
+class player
+{
+private:
+	unsigned int position[2];
+	string bitMapName;
+	string description;
+
+public:
+	player(void);
+	unsigned int getPositionX(void);
+	unsigned int getPositionY(void);
+	string getBitMap(void);
+	string getDescription(void);
+	void changeDescription(string newDescription);
+	void changePosition(unsigned int pos[2]);
+	void changeBitMap(string newBitMap);
+
+};
+
+player::player(void)
+{
+	position[0] = 0, position[1] = 0;
+	bitMapName = "None";
+	description = "This is an empty player";
+}
+
+unsigned int player::getPositionX(void) {return position[0];}
+unsigned int player::getPositionY(void) {return position[1];}
+
+string player::getBitMap(void) {return bitMapName;}
+string player::getDescription(void) {return description;}
+void player::changeDescription(string newDescription) {description = newDescription;}
+void player::changePosition(unsigned int pos[2]) {position[0] = pos[0], position[1] = pos[1];}
+void player::changeBitMap(string newBitMap) {bitMapName = newBitMap;}
+
 /*
 tile is used as the base unit of the world
 
