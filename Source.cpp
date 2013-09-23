@@ -4,9 +4,7 @@
 #include <GL\freeglut.h>
 #include <GL\GL.h>
 #include <iostream>
-#include <fstream>
 #include "WORLD.h"
-#include "FAILED_WORLD.h"
 
 using namespace std;
 
@@ -15,6 +13,11 @@ unsigned int initSize[2] = {1,1};
 world DAN(initSize);
 double* mallColors;
 double* mall;
+double WIDTH = 600;
+double HEIGHT = 600;
+double newX = 0;
+double newY = 0;
+player nathan(DAN);
 
 void display(void)
 {
@@ -25,27 +28,30 @@ void display(void)
 	glEnableClientState(GL_COLOR_ARRAY);
 
 	glLoadIdentity();
-
+	glMatrixMode(GL_MODELVIEW);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	gluOrtho2D(0, 500, 500, 0);
+	gluOrtho2D(newX,WIDTH + newX, newY, HEIGHT + newY);
+	glViewport(0,0,WIDTH, HEIGHT);
 
 	//glColorPointer(3*DAN.getX()*DAN.getY(), GL_FLOAT, 0 , mallColors);
 	//glVertexPointer(2*DAN.getX()*DAN.getY(), GL_INT, 0, mall);
 
 	//glDrawArrays(GL_POINTS,0, 2*DAN.getX()*DAN.getY());
 	glColor3f(1,1,1);
-	glPointSize(10);
+	glPointSize(62);
 	glBegin(GL_POINTS);
 	unsigned int pos[2];
-	for(int i = 0; i < DAN.getX(); i++)
+	glColor3f(0,1,0);
+	glVertex2i(nathan.getPositionX(), nathan.getPositionY());
+	for(int i = 0; i < DAN.getY(); i++)
 	{
-		pos[0] = i;
-		for(int j = 0; j < DAN.getY(); j++)
+		pos[1] = i;
+		for(int j = 0; j < DAN.getX(); j++)
 		{
-			pos[1] = j;
+			pos[0] = j;
 			if(DAN.getTileCollision(DAN.checkTileMap(pos))) glColor3f(1,1,1);
 			else glColor3f(1,0,0);
-			glVertex2i(j*10,i*10);
+			glVertex2i(j*64,i*64);
 		}
 	}
 	glEnd();
@@ -88,7 +94,24 @@ void populateWorld(world map)
 
 void reshape(int x, int y)
 {
-	//gluOrtho2D(0, x, 0, y);
+	WIDTH = x, HEIGHT = y;
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+	if(key == 'w')
+		nathan.checkMovement(DAN, 0 , 8);
+	else if(key == 's')
+		nathan.checkMovement(DAN, 0 , -8);
+	if(key == 'a')
+		nathan.checkMovement(DAN, -8 , 0);
+	else if(key == 'd')
+		nathan.checkMovement(DAN, 8, 0);
+	if (key == 'y') newY+=64;
+	else if(key == 'h') newY-=64;
+	else if(key == 'g') newX-=64;
+	else if(key == 'j') newX+=64;
+
 }
 
 void main(int argv, char* argc[])
@@ -97,11 +120,12 @@ void main(int argv, char* argc[])
 
 	object newBlock;
 
-	unsigned int size[] = {1,1};
+	unsigned int size[] = {5,5};
 
-	player greg;
-	unsigned int meow[2] = {0,0};// = new unsigned int[2];
-	cout << meow[0] << ' ' << meow[1] << endl;
+	//DAN.changePlayerStart(
+	DAN.changePlayerStart(size);
+	player greg(DAN);
+	nathan = greg;
 
 	//DAN.changeTilePassthrough(1, true);
 	//DAN.changeObjectPassthrough(0, true);
@@ -119,34 +143,54 @@ void main(int argv, char* argc[])
 
 	DAN.addTile(block);
 	DAN.printLog();
-	for(int j = 0; j < 2; j++)
+	for(int j = 0; j < 19; j++)
 	{
-		for(int i = 0; i < 20; i++)
+		for(int i = 0; i < 19; i++)
 		{
 			DAN.setTileLocation(size, 1);
 			size[0]++;
 		}
 		size[1]++;
-		size[0]-=20;
+		size[0]-=19;
 	}
+	size[1] = 18;
+	size[0] = 6;
+	DAN.setTileLocation(size, 0);
+
+	size[1] = 17;
+	size[0] = 6;
+	DAN.setTileLocation(size, 0);
+
+	size[1] = 17;
+	size[0] = 7;
+	DAN.setTileLocation(size, 0);
+
+	size[1] = 18;
+	size[0] = 7;
+	DAN.setTileLocation(size, 0);
+
+	size[1] = 7;
+	size[0] = 7;
+	DAN.setTileLocation(size, 0);
 	populateWorld(DAN);
 
-	for(int i = 0; i < DAN.getX(); i++)
+	for(int i = DAN.getX() - 1; i > 0; i--)
 	{
-		size[0] = i;
+		size[1] = i;
 		for(int j = 0; j < DAN.getY(); j++)
 		{
-			size[1] = j;
+			size[0] = j;
 			cout << (DAN.checkTileMap(size));
 		}
 		cout << endl;
 	}
 
 	glutInit(&argv, argc);
-	glutInitWindowSize(500,500);
+	glutInitWindowSize(600,600);
 	glutCreateWindow("Pure Kleptomania");
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
 	glutMainLoop();
 }
 
