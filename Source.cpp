@@ -99,8 +99,8 @@ player menuStates(player character, world map)
 		if(keys[6]);
 		else 
 		{
-			character.checkMovement(map, 0, 8);
-			character.checkMovement(map, -8, 0);
+			character.checkMovement(map, 0, 1);
+			character.checkMovement(map, -1, 0);
 		}
 	}
 	//W and D
@@ -109,8 +109,8 @@ player menuStates(player character, world map)
 		if(keys[6]);
 		else
 		{
-			character.checkMovement(map, 0, 8);
-			character.checkMovement(map, 8, 0);
+			character.checkMovement(map, 0, 1);
+			character.checkMovement(map, 1, 0);
 		}
 	}
 	//S and A
@@ -119,8 +119,8 @@ player menuStates(player character, world map)
 		if(keys[6]);
 		else 
 		{
-			character.checkMovement(map, -8, 0);
-			character.checkMovement(map, 0, -8);
+			character.checkMovement(map, -1, 0);
+			character.checkMovement(map, 0, -1);
 		}
 
 	}
@@ -128,31 +128,31 @@ player menuStates(player character, world map)
 	else if(keys[1] && keys[3])
 	{
 		if(keys[6]);
-		else character.checkMovement(map, 8, -8);
+		else character.checkMovement(map, 1, -1);
 	}
 	//W
 	else if(keys[0])
 	{
 		if(keys[6]);
-		else character.checkMovement(map, 0, 8);
+		else character.checkMovement(map, 0, 1);
 	}
 	//S
 	else if(keys[1])
 	{
 		if(keys[6]);
-		else character.checkMovement(map, 0, -8);
+		else character.checkMovement(map, 0, -1);
 	}
 	//A
 	else if(keys[2])
 	{
 		if(keys[6]);
-		else character.checkMovement(map, -8, 0);
+		else character.checkMovement(map, -1, 0);
 	}
 	//D
 	else if(keys[3])
 	{
 		if(keys[6]);
-		else character.checkMovement(map, 8, 0);
+		else character.checkMovement(map, 1, 0);
 	}
 	//Action or E key
 	else if(keys[4]);
@@ -190,13 +190,13 @@ void calculateViewPort(player character)
 void updateViewPort(player character)
 {
 	if((character.getPositionX() - viewPortCenter[0]) > 0.75*WIDTH)
-		viewPortCenter[0] += 8; 
+		viewPortCenter[0] += character.getSpeed(); 
 	else if((character.getPositionX() - viewPortCenter[0]) < 0.25*WIDTH)
-		viewPortCenter[0]-=8; 
+		viewPortCenter[0]-= character.getSpeed(); 
 	if((character.getPositionY() - viewPortCenter[1]) > 0.75*HEIGHT)
-		viewPortCenter[1]+=8; 
+		viewPortCenter[1]+= character.getSpeed(); 
 	else if((character.getPositionY() - viewPortCenter[1]) < 0.25*HEIGHT)
-		viewPortCenter[1]-=8; 
+		viewPortCenter[1]-= character.getSpeed(); 
 
 }
 
@@ -220,7 +220,7 @@ void display(void)
 
 	//glDrawArrays(GL_POINTS,0, 2*DAN.getX()*DAN.getY());
 	glColor3f(1,1,1);
-	glPointSize(62);
+	glPointSize(64);
 	glBegin(GL_POINTS);
 	unsigned int pos[2];
 	glColor3f(0,1,0);
@@ -251,6 +251,7 @@ void reshape(int x, int y)
 
 void idle(void)
 {
+	nathan.setSpeed(8);
 	nathan = menuStates(nathan, DAN);
 }
 
@@ -325,10 +326,10 @@ void main(int argv, char* argc[])
 	glutInitWindowSize(600,600);
 	glutCreateWindow("Pure Kleptomania");
 	glutDisplayFunc(display);
-	glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboardInput);
 	glutKeyboardUpFunc(keyRelease);
+		glutIdleFunc(idle);
 	glutMainLoop();
 }
 

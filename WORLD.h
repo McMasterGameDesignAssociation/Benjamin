@@ -251,9 +251,11 @@ private:
 	unsigned int position[2];
 	string bitMapName;
 	string description;
+	int speed;
 
 public:
 	player(world map);
+	int getSpeed(void);
 	unsigned int getPositionX(void);
 	unsigned int getPositionY(void);
 	string getBitMap(void);
@@ -262,6 +264,7 @@ public:
 	void changePosition(unsigned int pos[2]);
 	void changeBitMap(string newBitMap);
 	void checkMovement(world map, int x, int y);
+	void setSpeed(int movement);
 
 };
 
