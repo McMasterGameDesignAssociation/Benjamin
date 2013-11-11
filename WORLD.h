@@ -11,10 +11,8 @@ to manage there respective entity type
 #ifndef _WORLD
 #define _WORLD
 
-#include <stdlib.h>
-#include <iostream>
-#include <string>
-#include <vector>
+#include "COLLECTIONS.h"
+
 
 using namespace std;
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _WORLD_METHODS
 #define _WORLD_METHODS
 
