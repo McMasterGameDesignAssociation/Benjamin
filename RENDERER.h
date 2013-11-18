@@ -5,6 +5,7 @@
 
 #include "COLLECTIONS.h"
 
+
 class renderer
 {
 public:
@@ -17,6 +18,7 @@ public:
 	void clearArrays(void);
 	void worldToArray(world gameSpace, int resolution);
 	void testRender(void);
+	image textureData;
 	~renderer(void);
 
 private:
@@ -25,7 +27,6 @@ private:
 	vector<int*> tempVertices;
 	vector<double*> tempColors;
 	bool buildOk;
-
 	void buildArrays();
 
 };

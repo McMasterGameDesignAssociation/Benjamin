@@ -13,7 +13,6 @@ to manage there respective entity type
 
 #include "COLLECTIONS.h"
 
-
 using namespace std;
 
 /*

@@ -1,11 +1,12 @@
+#pragma once
 #ifndef _PURE_KLEPTOMANIA
 #define _PURE_KLEPTOMANIA
 
 #include "COLLECTIONS.h"
 #include "KEYBOARD.h"
+#include "RENDERER.h"
 
 using namespace kyb;
-
 using namespace std;
 
 double WIDTH = 600;
@@ -46,11 +47,9 @@ void display(void)
 	glutInitDisplayMode(GL_DEPTH | GL_DOUBLE | GL_RGBA);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
 
 	glLoadIdentity();
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
 	
 	gluOrtho2D(viewPortCenter[0], WIDTH + viewPortCenter[0], viewPortCenter[1], HEIGHT + viewPortCenter[1]);
 	glViewport(0,0,WIDTH, HEIGHT);
@@ -59,12 +58,28 @@ void display(void)
 
 	glPointSize(62);
 
-	glBegin(GL_POINTS);
-	glColor3f(0,1,0);
-	glVertex2i(nathan.getPositionX(), nathan.getPositionY());
-	glEnd();
-
+	//glBegin(GL_POINTS);
+	//glColor3f(0,1,0);
+	//glVertex2i(nathan.getPositionX(), nathan.getPositionY());
+	//glEnd();
 	scene.render();
+
+	glBindTexture(GL_TEXTURE_2D, scene.textureData.getTexture());
+
+	float textureCoords[] = {0,0, 1,0, 0,1, 0,1, 1,1, 1,0};
+	float playerPos[] = {nathan.getPositionX()-32,nathan.getPositionY()-32,
+		nathan.getPositionX()+32,nathan.getPositionY()-32,
+		nathan.getPositionX()-32,nathan.getPositionY()+32,
+		nathan.getPositionX()-32,nathan.getPositionY()+32,
+		nathan.getPositionX()+32,nathan.getPositionY()+32,
+		nathan.getPositionX()+32,nathan.getPositionY()-32};
+	float playerCol[] = {1,1,0, 1,1,0, 0,1,1, 0,1,1, 1,0,1, 1,0,1};
+
+	//cout << scene.textureData.texture[0] << endl;
+	glVertexPointer(2, GL_FLOAT, 0, playerPos);
+	glColorPointer(3, GL_FLOAT, 0, playerCol);
+	glTexCoordPointer(2, GL_FLOAT, 0, textureCoords);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glutPostRedisplay();
 	glutSwapBuffers();
@@ -79,7 +94,7 @@ void reshape(int x, int y)
 
 void idle(void)
 {
-	nathan.setSpeed(16);
+	nathan.setSpeed(4);
 	nathan = menuStates(nathan, DAN);
 	//if(1 < cycles)
 	//{
